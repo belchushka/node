@@ -192,7 +192,7 @@ async function run() {
 
     root.use(errorHandler)
 
-    cron.schedule('30 * * * *', async () => {
+    cron.schedule('10 * * * *', async () => {
       const users = await prisma.user.findMany({
         include: {
           subscription: true
