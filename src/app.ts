@@ -48,6 +48,9 @@ async function run() {
      *         in: query
      *         type: string
      *       - name: orderBy
+     *         schema:
+     *          type: string
+     *          enum: ['tokens:asc', 'tokens:desc']
      *         in: query
      *         type: string
      *     responses:
