@@ -239,7 +239,7 @@ async function run() {
 
     app.use('/api/v1', root)
 
-    app.listen(8000, '127.0.0.1')
+    app.listen(8000, '0.0.0.0')
 }
 
 run()
