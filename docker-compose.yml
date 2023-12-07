@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  db_dev:
+    image: postgres:13
+    restart: always
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data/pgdata
+
+  db_prod:
+    image: postgres:13
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data_prod:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+
+  api_prod:
+    build:
+      dockerfile: ./dockerfiles/Dockerfile
+    depends_on:
+      - db_prod
+    restart: always
+    ports:
+      - 127.0.0.1:8000:8000
+    env_file:
+      - .env
+
+volumes:
+  db_data_prod:  
+
+networks:
+  default:
+    name: bothub-backend

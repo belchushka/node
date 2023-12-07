@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Currency {
+  RUB
+  USD
+  EUR
+  SYSTEM_TOKEN
+}
+
+enum TransactionStatus {
+  FAILED
+  SUCCEDED
+  PENDING
+}
+
+enum TransactionType {
+  SUBSCRIPTION
+  WRITE_OFF
+  REPLENISH
+  WITHDRAW
+}
+
+enum TransactionProvider {
+  YOOMONEY
+  CRYPTO
+  SYSTEM
+  TINKOFF
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum PlanType {
+  FREE
+  BASIC
+  PREMIUM
+  ELITE
+}
+
+model Subscription {
+  id                String      @id @default(uuid())
+  plan_id           String?
+  plan              Plan?       @relation(name: "subscriptionsPlan", fields: [plan_id], references: [id], onDelete: Cascade)
+  user_id           String?     @unique
+  user              User?       @relation(name: "subsriptionsUser", fields: [user_id], references: [id], onDelete: Cascade)
+  tokens            Int
+  additional_tokens Int         @default(0)
+  created_at        DateTime    @default(now())
+
+  @@map("subscriptions")
+}
+
+model Transaction {
+  id          String              @id @default(uuid())
+  provider    TransactionProvider
+  amount      Float
+  currency    Currency
+  meta        Json?
+  status      TransactionStatus
+  type        TransactionType
+  plan_id     String?
+  plan        Plan?               @relation(name: "transactionsPlan", fields: [plan_id], references: [id])
+  user_id     String?
+  user        User?               @relation(name: "transactionsUser", fields: [user_id], references: [id])
+  referral_id String?
+  created_at  DateTime            @default(now())
+  external_id String?
+
+  @@unique([provider, external_id], name: "transactionUnique")
+  @@map("transactions")
+}
+
+model Plan {
+  id                String             @id @default(uuid())
+  type              PlanType
+  price             Float
+  currency          Currency
+  tokens            Int
+  subscriptions     Subscription[]     @relation(name: "subscriptionsPlan")
+  transactions      Transaction[]      @relation(name: "transactionsPlan")
+
+  @@unique([type, currency], name: "planUnique")
+  @@map("plans")
+}
+
+model User {
+  id                    String                @id @default(uuid())
+  email                 String?               @unique
+  tg_id                 String?               @unique
+  name                  String?
+  password              String?
+  avatar                String?
+  subscription          Subscription?         @relation(name: "subsriptionsUser")
+  transactions          Transaction[]         @relation(name: "transactionsUser")
+  created_at            DateTime              @default(now())
+  role                  Role                  @default(USER)
+
+  @@map("users")
+}
