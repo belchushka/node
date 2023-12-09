@@ -3,6 +3,7 @@ import {validationResult} from 'express-validator';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const errorHandler = (error: Error, req: Request, res: Response, next: NextFunction) =>{
+  console.log(error)
   return res.status(500).json({
     status: 'error',
   })
