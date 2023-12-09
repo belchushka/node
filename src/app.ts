@@ -88,6 +88,7 @@ async function run() {
             data: [],
             pages: 0
           })
+          return
         }
 
           const query = {
@@ -143,6 +144,8 @@ async function run() {
             data,
             pages
           })
+
+          return
     }))
 
     /**
@@ -187,6 +190,7 @@ async function run() {
       })
 
       res.status(200).json(trans)
+      return
     }))
 
     const openapiSpecification = swaggerJSDoc(options);
