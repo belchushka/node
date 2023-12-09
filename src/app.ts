@@ -199,7 +199,8 @@ async function run() {
 
     root.use(errorHandler)
 
-    cron.schedule('10 * * * *', async () => {
+    cron.schedule('1 * * * *', async () => {
+      try {
       const users = await prisma.user.findMany({
         include: {
           subscription: true
@@ -242,6 +243,9 @@ async function run() {
       }
 
       await Promise.all(jobs)
+    } catch (e) {
+      console.log(e)
+    }
     });
 
     app.use('/api/v1', root)
