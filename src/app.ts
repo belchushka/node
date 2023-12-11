@@ -211,7 +211,12 @@ async function run() {
 
       for (const user of users) {
 
-        const type = Math.random() > 0.5 ? TransactionType.WRITE_OFF : TransactionType.REPLENISH
+        let type = Math.random() > 0.5 ? TransactionType.WRITE_OFF : TransactionType.REPLENISH
+
+        if ( user.subscription?.tokens && user.subscription?.tokens <= 50_000) {
+          type = TransactionType.REPLENISH
+        }
+
         const amount = Math.floor(Math.random() * user.subscription!.tokens)
 
         jobs.push(prisma.transaction.create({
