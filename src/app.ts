@@ -9,19 +9,11 @@ import swaggerJSDoc from "swagger-jsdoc";
 import { options } from "./swagger";
 import swaggerUI from 'swagger-ui-express'
 
-const config = {
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    db: process.env.POSTGRES_DB,
-    host: process.env.POSTGRES_HOST,
-    port: process.env.POSTGRES_PORT,
-}
-
 async function run() {
     const prisma = new PrismaClient({
         datasources: {
           db: {
-            url: `postgresql://${config.user}:${config.password}@${config.host}:${config.port}/${config.db}`
+            url: process.env.DATABASE_URL as string
           },
         },
     })
@@ -217,7 +209,7 @@ async function run() {
           type = TransactionType.REPLENISH
         }
 
-        const amount = Math.floor(Math.random() * user.subscription!.tokens)
+        const amount = Math.floor(Math.random() * user.subscription!.tokens + 20_000)
 
         jobs.push(prisma.transaction.create({
           data: {
