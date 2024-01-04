@@ -1,4 +1,4 @@
-import { PrismaClient, Currency, Plan, PlanType, Role, Prisma } from '@prisma/client'
+import { PrismaClient, Currency, Plan, PlanType, Role, Prisma, TransactionProvider, TransactionType, TransactionStatus } from '@prisma/client'
 import { faker } from '@faker-js/faker';
 
 export const plans: Array<Omit<Plan, 'id'>> = [
@@ -89,6 +89,23 @@ async function main() {
   const users = []
 
   for(let i=0; i<100; i++){
+
+    const transactions: Array<Prisma.TransactionCreateManyInput> = []
+
+    for (let i=0; i<33; i++) {
+      let type = Math.random() > 0.5 ? TransactionType.WRITE_OFF : TransactionType.REPLENISH
+      const amount = Math.floor(Math.random() * 20_000)
+
+      transactions.push({
+            currency: Currency.SYSTEM_TOKEN,
+            type: type,
+            provider: TransactionProvider.SYSTEM,
+            amount: amount,
+            status: Math.random() > 0.5 ? TransactionStatus.PENDING : TransactionStatus.SUCCEDED
+      })
+    }
+
+
     users.push(prisma.user.create({
       data:{
         email: faker.internet.email(),
@@ -98,6 +115,11 @@ async function main() {
           create: {
             tokens: Math.floor(Math.random() * 100_000),
             plan_id: p[Math.floor(Math.random() * plans.length)].id
+          }
+        },
+        transactions: {
+          createMany: {
+            data: transactions
           }
         }
       }

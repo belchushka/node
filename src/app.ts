@@ -191,60 +191,6 @@ async function run() {
 
     root.use(errorHandler)
 
-    cron.schedule('*/10 * * * *', async () => {
-      try {
-      const users = await prisma.user.findMany({
-        include: {
-          subscription: true
-        }
-      })
-
-      const jobs = []
-
-      for (const user of users) {
-
-        let type = Math.random() > 0.5 ? TransactionType.WRITE_OFF : TransactionType.REPLENISH
-
-        if ( user.subscription?.tokens && user.subscription?.tokens <= 50_000) {
-          type = TransactionType.REPLENISH
-        }
-
-        const amount = Math.floor(Math.random() * user.subscription!.tokens + 20_000)
-
-        jobs.push(prisma.transaction.create({
-          data: {
-            user_id: user.id,
-            currency: Currency.SYSTEM_TOKEN,
-            type: type,
-            provider: TransactionProvider.SYSTEM,
-            amount: amount,
-            status: Math.random() > 0.5 ? TransactionStatus.PENDING : TransactionStatus.SUCCEDED
-          }
-        }))
-
-        jobs.push(prisma.subscription.update({
-          where: {
-            user_id: user.id
-          },
-          data: {
-            tokens: {
-              ...(type === TransactionType.WRITE_OFF && {
-                decrement: amount
-              }),
-              ...(type === TransactionType.REPLENISH && {
-                increment: amount
-              }),
-            }
-          }
-        }))
-      }
-
-      await Promise.all(jobs)
-    } catch (e) {
-      console.log(e)
-    }
-    });
-
     app.use('/api/v1', root)
 
     app.listen(8000, '0.0.0.0')
